@@ -1,12 +1,12 @@
 services:
   ytdl:
-    image: pknw1/ytdl-prod:latest 
+    image: pknw1/ytdl-prod:dev 
     container_name: ytdl
     hostname: ytdl
     networks:
       - proxy
     volumes:
-      - ./config:/data
+      - ./config:/config
       - /media:/media
       - /dev/fuse:/dev/fuse
     environment:
