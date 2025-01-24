@@ -37,19 +37,15 @@ def task():
 
 @app.route('/status')
 def download_status():
-  data = localStorage.getItem('data')
-  ytdata = {}
-  ytdata = localStorage.getItem('metadata')
   yt_title = localStorage.getItem('yt_title')
   yt_channel = localStorage.getItem('yt_channel')
   yt_year = localStorage.getItem('yt_year')
-  yt_description = localStorage.getItem('yt_description')
   download_url = localStorage.getItem('download_url')
   video_id = localStorage.getItem('video_id')
     
   t1 = Thread(target=task)
   t1.start()
-  return render_template('d.html',data=data, yt_title=yt_title, ytdata=ytdata, yt_channel=yt_channel, yt_year=yt_year, yt_description=yt_description, download_url=download_url, video_id=video_id)
+  return render_template('status2.html', yt_title=yt_title, yt_channel=yt_channel, yt_year=yt_year, download_url=download_url, video_id=video_id)
 
 
 @app.route('/api/status', methods=['GET'])
@@ -67,7 +63,7 @@ def ytmetadata(id=None):
             'Authorization': 'Bearer your_token_here',
             'Content-Type': 'application/json'
         }
-    target_url = "https://content-youtube.googleapis.com/youtube/v3/videos?id="+id+"&part=snippet,contentDetails,statistics&key="+api_key
+    target_url = "http://content-youtube.googleapis.com/youtube/v3/videos?id="+id+"&part=snippet,contentDetails,statistics&key="+api_key
     response = requests.get(target_url)
     return response.json()
 
@@ -82,10 +78,10 @@ def metadata(id):
     return response
 
 @app.route('/download/<id>')
-@app.route('/api/download/<id>')
-@app.route('/api/download/<id>/<res>')
+@app.route('/download/<id>/<res>')
 def download(id=None,res=None):
-
+    print(id)
+    print(res)
     if res == None:
         res="480"
     else:
@@ -103,6 +99,7 @@ def download(id=None,res=None):
 
     youtube_metadata = {}
     youtube_metadata = ytmetadata(id)
+    print(youtube_metadata)
     localStorage.setItem('metadata',youtube_metadata)
 
     download_id = download_data['id']
@@ -173,30 +170,37 @@ def ytdl(id):
    response = redirect('/download/'+id)
    return response
 
-
+@app.route('/test/<page>')
+def test(page=None):
+    response = render_template(page+'.html')
+    return response
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'GET':
+        try:
+          id = request.args.get('id')
+          try:
+             res = request.args.get('res')
+          except:
+             res = '480'
+        except:
+          id = '' 
+
+        if id != None:
+           response = redirect('/download/'+id+'/'+res)
+        else:
+           response = render_template('dl2.html')
+
     if request.method == 'POST':
-        videoid = request.form.get('videoid')
-        resolution = request.form.get('resolution')
-        print(videoid)
-        target_url = "https://yt.pknw1.co.uk/ytdl"
+        videoid = request.form.get('url')
+        res = request.form.get('res')
         videoid=videoid.split("=")
         video_id=videoid[(len(videoid)-1)]
-        headers = {
-            'Content-Type': 'application/json'
-        }
+        url = '/download/'+video_id+'/'+res
+        response = redirect(url)
 
-        payload = {
-            'videoid': videoid,
-            'resolution': resolution
-        }
-
-        url = target_url+'/'+video_id
-        return redirect(url)
-    return render_template('form.html')
-
+    return response
 
 if __name__ == '__app__':
     app.run(debug=True)

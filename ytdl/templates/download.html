@@ -69,7 +69,8 @@ body .after-message {
 {font-family: Arial, Helvetica, sans-serif;}
   
   body {
-    background-color: #D64F2A;
+    background-color: #232323;
+    font-family: Arial, Helvetica, sans-serif;
   }
   
   .progress {
@@ -89,6 +90,10 @@ body .after-message {
     font-size: 40px;
     font-weight: bold;
   }
+  .progressbar {
+	  background-color: green;
+	  width:30%
+  }
   
   </style>
 
@@ -99,18 +104,24 @@ body .after-message {
 <body>
   <div class="progress">
     <div class="status">
-      <h2 id="innerStatus">Loading...</h2>
+      <h2 id="innerStatus">
+	      <center>
+	      <div style="background-color: #0de58a" id="progressbar">Loading...
+	      </div></h2>
+	      </center>
       <h4 id="outerStatus">
 	<div class="row">
   <div class="column" style="background-color:#232323;">
+	  <center>
     <p>
     <img src="https://i.ytimg.com/vi/RFJzEKCrisQ/hqdefault.jpg" width="300px"/>
-    </p>
+    </p></center>
   </div>
   <div class="column" style="background-color:#232323;">
   <p>
-    <button href="" class="button">Download</button> <br>
-    <button href="" class="button">Download to Plex</button>
+    <h4>                 <br></h4>
+    <button href="" class="button" id="dl" target="_new">Download</button> <br>
+    <a href="/download_to_plex/"><button href="/api/ytdl/" target="_new" class="button" id="dlplex">Download to Plex</button></a>
   </p>
   </div>
 </div>
@@ -134,18 +145,18 @@ async function getStatus() {
     console.error("Error: ", e);
   }
   
-  document.getElementById("innerStatus").innerHTML = get.status * 10 + "&percnt;";
-  
-  if (get.status == 10){
-    document.getElementById("innerStatus").innerHTML += " Done.";
+  document.getElementById("progressbar").innerHTML = get.progress * 10 + "&percnt;";
+  document.getElementById("progressbar").style.width = get.progress * 8 +"%";
+  if (get.status == 1){
+    document.getElementById("progressbar").innerHTML += " Done.";
+    document.getElementById("dl").innerHTML += "";
+		  document.getElementById("dl").href += "";
     clearTimeout(timeout);
-		  document.getElementById("link").href += "{{ data['youtube_metadata']['items'][0]['snippet']['title'] }}";
-    document.getElementById("link").innerHTML += "{{ data['youtube_metadata']['items'][0]['snippet']['title'] }}";
 
     return false;
   }
    
-  timeout = setTimeout(getStatus, 1000);
+  timeout = setTimeout(getStatus, 5000);
 }
 
 getStatus();
