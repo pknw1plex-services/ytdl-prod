@@ -27,3 +27,5 @@ _trial_temp
 .idea/
 .tox
 .ssh
+**/config
+config/**
