@@ -29,3 +29,4 @@ _trial_temp
 .ssh
 **/config
 config/**
+keys

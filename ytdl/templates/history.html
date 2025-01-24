@@ -107,11 +107,7 @@
             <div class="tab-pane fade show active md-form" id="home-just" role="tabpanel">
                 <div class="d-flex justify-content-center row">
                     <input type="url" name="url" id="url" class="form-control form-control-lg col-md-7 mr-sm-2 mb-2 mb-sm-0" placeholder="Insert URL here" aria-label="Insert URL here">
-		      <select name="res" id="res">
-    <option value="480">480</option>
-    <option value="720">720</option>
-    <option value="1080">1080</option>
-  </select>
+                    <input type="res" name="res" id="res" class="form-control form-control-lg col-md-7 mr-sm-2 mb-2 mb-sm-0" placeholder="Res" aria-label="Res">
 
                     <button class="btn btn-success col-md-2 m-0" id="submit" type="submit">Download to Plex</button>
 
@@ -119,7 +115,16 @@
             </div>
         </div>
                                         </form>
-
+					<table>
+					<tr>
+					<th>id</th><th>title</th><th>link</th>
+					</tr>
+					{% for sections in history %}
+                                        <tr><td>{{sections}}</td>
+						<td>{{history[sections]['title']}}</td>
+					    <td>{{history[sections]['link']}}</td></tr>
+					{% endfor %}
+					</table>
     </div>
                 <li class="nav-item"><a class="nav-link" data-toggle="modal" data-target="#quicklinkmodal"><i class="fas fa-link"></i> QuickLink</a></li>
 

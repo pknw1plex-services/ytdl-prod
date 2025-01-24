@@ -1,4 +1,6 @@
 from flask import redirect, Flask, render_template, request, jsonify,session
+from urllib.request import urlopen
+from shutil import copyfileobj
 import os
 from localStoragePy import localStoragePy
 import requests
@@ -8,19 +10,23 @@ from threading import Thread
 from time import sleep
 import json
 import base64
+import configparser
 
 keyFile = open('config/keys', 'r')
 app = Flask(__name__)
-api_key = keyFile.readline().rstrip()
+api_key = 'AIzaSyCqSJwVtcBcSyeUgizos7uKXbBWgVh-8qg'
+##keyFile.readline().rstrip()
 app.secret_key = keyFile.readline().rstrip()
 progress = 0
 status = 0
-
+download_url = ''
 localStorage = localStoragePy('pk', 'text')
+config_object = configparser.ConfigParser()
 
 def task():
   global status
   global progress
+  global download_url
   data = {}
   data = localStorage.getItem('data')
   progress_data = localStorage.getItem('progress')
@@ -31,29 +37,34 @@ def task():
     localStorage.setItem('progress', response)
     status = response['success']
     progress = response['progress']
+    download_url = response['download_url']
+    localStorage.setItem('download_url', download_url)
     progress=(int(response['progress'])/100)
   sleep(5)
 
 
 @app.route('/status')
 def download_status():
+  global download_url
+
   yt_title = localStorage.getItem('yt_title')
   yt_channel = localStorage.getItem('yt_channel')
   yt_year = localStorage.getItem('yt_year')
-  download_url = localStorage.getItem('download_url')
+  poster = localStorage.getItem('poster')
   video_id = localStorage.getItem('video_id')
     
   t1 = Thread(target=task)
   t1.start()
-  return render_template('status2.html', yt_title=yt_title, yt_channel=yt_channel, yt_year=yt_year, download_url=download_url, video_id=video_id)
+  return render_template('status2.html', yt_title=yt_title, poster=poster, yt_channel=yt_channel, yt_year=yt_year, video_id=video_id)
 
 
 @app.route('/api/status', methods=['GET'])
 def getStatus():
   global status
   global progress
+  global download_url
   data = localStorage.getItem('data')
-  statusList = {'status':status, 'progress': progress, 'data': data}
+  statusList = {'status':status, 'progress': progress, 'download_url': download_url, 'data': data}
   return json.dumps(statusList)
 
 
@@ -95,11 +106,12 @@ def download(id=None,res=None):
     }
     download_data = {}
     download_data = requests.get(target_url).json()
+    #print(download_data)
     localStorage.setItem('download_data',download_data)
 
     youtube_metadata = {}
     youtube_metadata = ytmetadata(id)
-    print(youtube_metadata)
+    #print(youtube_metadata['items'][0]['snippet']['thumbnails'])
     localStorage.setItem('metadata',youtube_metadata)
 
     download_id = download_data['id']
@@ -108,6 +120,7 @@ def download(id=None,res=None):
     localStorage.setItem('download_data_id',download_id)
     target_url = 'https://p.oceansaver.in/ajax/progress.php?id='+download_id
     progress_data = requests.get(target_url).json()
+    print(progress_data)
     localStorage.setItem('progress',progress_data)
 
     data = {}
@@ -119,7 +132,8 @@ def download(id=None,res=None):
     localStorage.setItem('yt_title',youtube_metadata['items'][0]['snippet']['title'].replace('"',""))
     localStorage.setItem('yt_channel',youtube_metadata['items'][0]['snippet']['channelTitle'])
     localStorage.setItem('yt_year',youtube_metadata['items'][0]['snippet']['publishedAt'].split('-',1)[0])
-    localStorage.setItem('yt_description',youtube_metadata['items'][0]['snippet']['description'].replace("\n","<br>"))
+    #localStorage.setItem('yt_description',youtube_metadata['items'][0]['snippet']['description'].replace("\n","<br>"))
+    localStorage.setItem('poster',youtube_metadata['items'][0]['snippet']['thumbnails']['high']['url'])
     localStorage.setItem('download_url',progress_data['download_url'])
     localStorage.setItem('video_id',id)
 
@@ -132,19 +146,76 @@ def download(id=None,res=None):
 
 @app.route('/download_to_plex/<id>')
 def pleX_dl(id=None):
+    global download_url
     data = localStorage.getItem('data')
     ytdata = localStorage.getItem('metadata')
     yt_title = localStorage.getItem('yt_title')
     yt_channel = localStorage.getItem('yt_channel')
     yt_year = localStorage.getItem('yt_year')
     yt_description = localStorage.getItem('yt_description')
-    download_url = localStorage.getItem('download_url')
+    if download_url == '':
+        local_download_url = localStorage.getItem('download_url')
+    else:
+        local_download_url = download_url
     video_id = localStorage.getItem('video_id')
+    poster = localStorage.getItem('poster')
     newpid = os.fork()
+    file =open("config.ini","r")
+    config_object.read_file(file)
+    if config_object.has_section(video_id) == False:
+        config_object.add_section(video_id)
+        config_object.set(video_id, 'title', yt_title)
+        config_object.set(video_id, 'channel', yt_channel)
+        config_object.set(video_id, 'link', download_url)
+        with open('config.ini', 'w') as configfile:
+            config_object.write(configfile)
+    else:
+        print("yes")
+    
+    output_dict=dict()
+    sections=config_object.sections()
+    print(sections)
+    for section in sections:
+        items=config_object.items(section)
+        output_dict[section]=dict(items)
+    json_string=json.dumps(output_dict)
+    print("The output JSON string is:")
+    print(json_string)
+    file.close()
+
     if newpid == 0:
         dl = plex_dl(id)
         print("done")
-    return render_template('plex.html',data=data, yt_title=yt_title, ytdata=ytdata, yt_channel=yt_channel, yt_year=yt_year, yt_description=yt_description, download_url=download_url, video_id=video_id)
+
+    return render_template('plex2.html',poster=poster, data=data, yt_title=yt_title, ytdata=ytdata, yt_channel=yt_channel, yt_year=yt_year, yt_description=yt_description, download_url=download_url, video_id=video_id, history=output_dict)
+
+@app.route('/add')
+def add():
+    file =open("config.ini","r")
+    config_object.read_file(file)
+
+    config_object.add_section(video_id)
+    config_object.set(video_id, 'title', yt_title)
+    config_object.set(video_id, 'link', download_url)
+    with open('config.ini', 'w') as configfile:
+        config_object.write(configfile) 
+    return "ok"
+@app.route('/history')
+def history():
+    file =open("config.ini","r")
+    config_object.read_file(file)
+
+    output_dict=dict()
+    sections=config_object.sections()
+    print(sections)
+    for section in sections:
+        items=config_object.items(section)
+        output_dict[section]=dict(items)
+    json_string=json.dumps(output_dict)
+    print("The output JSON string is:")
+    print(json_string)
+    file.close()
+    return render_template('history.html', history=output_dict)
 
 @app.route('/api/ytdl/<id>')
 def plex_dl(id=None):
@@ -156,9 +227,13 @@ def plex_dl(id=None):
   pathname = '/media/youtube/'+yt_channel
   if not os.path.exists(pathname):
     os.makedirs(pathname)
-  filename = yt_title+"-("+yt_year+")-["+id+"].mp4".replace("'","")
-  print(filename)
-  progress = urllib.request.urlretrieve(download_url, pathname+"/"+filename)
+  filename = yt_title+"-("+yt_year+")-["+id+"].mp4".replace("'","").replace("/","-")
+  dl_file = filename.replace("/","-")
+  dl_path = pathname+"/"+dl_file
+  print(dl_path)
+  with urlopen(download_url) as in_stream, open(dl_path, 'wb') as out_file:
+    copyfileobj(in_stream, out_file)
+  #progress = urllib.request.urlretrieve(download_url, pathname+"/"+filename)
   if not os.path.exists(pathname+"/"+filename):
       return "There was an error"
   else:
