@@ -63,7 +63,7 @@ def ytmetadata(id=None):
             'Authorization': 'Bearer your_token_here',
             'Content-Type': 'application/json'
         }
-    target_url = "http://content-youtube.googleapis.com/youtube/v3/videos?id="+id+"&part=snippet,contentDetails,statistics&key="+api_key
+    target_url = "https://content-youtube.googleapis.com/youtube/v3/videos?id="+id+"&part=snippet,contentDetails,statistics&key="+api_key
     response = requests.get(target_url)
     return response.json()
 
