@@ -14,8 +14,7 @@ import configparser
 
 keyFile = open('config/keys', 'r')
 app = Flask(__name__)
-api_key = 'AIzaSyCqSJwVtcBcSyeUgizos7uKXbBWgVh-8qg'
-##keyFile.readline().rstrip()
+api_key = keyFile.readline().rstrip()
 app.secret_key = keyFile.readline().rstrip()
 progress = 0
 status = 0
@@ -160,14 +159,14 @@ def pleX_dl(id=None):
     video_id = localStorage.getItem('video_id')
     poster = localStorage.getItem('poster')
     newpid = os.fork()
-    file =open("config.ini","r")
+    file =open("history.ini","r")
     config_object.read_file(file)
     if config_object.has_section(video_id) == False:
         config_object.add_section(video_id)
         config_object.set(video_id, 'title', yt_title)
         config_object.set(video_id, 'channel', yt_channel)
         config_object.set(video_id, 'link', download_url)
-        with open('config.ini', 'w') as configfile:
+        with open('history.ini', 'w') as configfile:
             config_object.write(configfile)
     else:
         print("yes")
@@ -188,34 +187,6 @@ def pleX_dl(id=None):
         print("done")
 
     return render_template('plex2.html',poster=poster, data=data, yt_title=yt_title, ytdata=ytdata, yt_channel=yt_channel, yt_year=yt_year, yt_description=yt_description, download_url=download_url, video_id=video_id, history=output_dict)
-
-@app.route('/add')
-def add():
-    file =open("config.ini","r")
-    config_object.read_file(file)
-
-    config_object.add_section(video_id)
-    config_object.set(video_id, 'title', yt_title)
-    config_object.set(video_id, 'link', download_url)
-    with open('config.ini', 'w') as configfile:
-        config_object.write(configfile) 
-    return "ok"
-@app.route('/history')
-def history():
-    file =open("config.ini","r")
-    config_object.read_file(file)
-
-    output_dict=dict()
-    sections=config_object.sections()
-    print(sections)
-    for section in sections:
-        items=config_object.items(section)
-        output_dict[section]=dict(items)
-    json_string=json.dumps(output_dict)
-    print("The output JSON string is:")
-    print(json_string)
-    file.close()
-    return render_template('history.html', history=output_dict)
 
 @app.route('/api/ytdl/<id>')
 def plex_dl(id=None):
