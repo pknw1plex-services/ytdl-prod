@@ -1,6 +1,6 @@
 services:
   ytdl:
-    image: pknw1/ytdl:latest 
+    image: pknw1/ytdl-prod:latest 
     container_name: ytdl
     hostname: ytdl
     networks:
