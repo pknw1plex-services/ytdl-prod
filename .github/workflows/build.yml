@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       docker_build:
-        description: 'Backup Service'
+        description: 'Docker Build'
         required: true
         type: boolean
         default: 'true'
       docker_pull:
-        description: 'Backup Config'
+        description: 'Remote Docker Pull'
         required: true
         type: boolean
       docker_root:
