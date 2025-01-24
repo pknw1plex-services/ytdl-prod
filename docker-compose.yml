@@ -10,7 +10,7 @@ services:
       - /media:/media
       - /dev/fuse:/dev/fuse
     environment:
-      - VIRTUAL_HOST=ytdl.pknw1.co.uk
+      - VIRTUAL_HOST=yt.pknw1.co.uk
       - VIRTUAL_PORT=8080
       - APP_GROUP=Core
       - APP_LOGO=https://static-00.iconduck.com/assets.00/portainer-icon-1465x2048-t155ekm0.png
