@@ -1,0 +1,165 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+body #app .card.green {
+  background-color: #006600;
+  color: #00ff00;
+}
+
+body iframe {
+	width:100%;height:800px;margin-top:-150px;
+}
+
+.button {
+    background-color: #e5a00d;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+
+body article {
+  width: 100%;
+  box-shadow: 0 0px 0px #232323;
+  }
+
+body .message-header {
+        display: block;
+}
+
+body .message-body {
+	background-color: #23232300; 
+}
+
+body .after-message {
+	background-color: #23232300; 
+  display: block;
+}
+
+
+
+{font-family: Arial, Helvetica, sans-serif;}
+  
+  body {
+    background-color: #232323;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  .progress {
+    display: flex;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .status {
+    color: white;
+    margin: auto;
+  }
+
+  .status h2 {
+    /*padding: 50px;*/
+    font-size: 40px;
+    font-weight: bold;
+  }
+  .progressbar {
+	  background-color: green;
+	  width:30%
+  }
+  
+  </style>
+
+  <title>Status Update</title>
+
+</head>
+
+<body>
+  <div class="progress">
+    <div class="status">
+      <h2 id="innerStatus">
+	      <center>
+	      <div style="background-color: #0de58a" id="progressbar">Loading...
+	      </div></h2>
+	      </center>
+      <h4 id="outerStatus">
+	<div class="row">
+  <div class="column" style="background-color:#232323;">
+	  <center>
+    <p>
+    <img src="https://i.ytimg.com/vi/RFJzEKCrisQ/hqdefault.jpg" width="300px"/>
+    </p></center>
+  </div>
+  <div class="column" style="background-color:#232323;">
+  <p>
+    <h4>                 <br></h4>
+    <button href="" class="button" id="dl" target="_new">Download</button> <br>
+    <a href="/download_to_plex/"><button href="/api/ytdl/" target="_new" class="button" id="dlplex">Download to Plex</button></a>
+  </p>
+  </div>
+</div>
+
+    </div>
+
+  </div>
+</body>
+
+<script>
+var timeout;
+
+async function getStatus() {
+
+  let get;
+  
+  try {
+    const res = await fetch("/api/status");
+    get = await res.json();
+  } catch (e) {
+    console.error("Error: ", e);
+  }
+  
+  document.getElementById("progressbar").innerHTML = get.progress * 10 + "&percnt;";
+  document.getElementById("progressbar").style.width = get.progress * 8 +"%";
+  if (get.status == 1){
+    document.getElementById("progressbar").innerHTML += " Done.";
+    document.getElementById("dl").innerHTML += "";
+		  document.getElementById("dl").href += "";
+    clearTimeout(timeout);
+
+    return false;
+  }
+   
+  timeout = setTimeout(getStatus, 5000);
+}
+
+getStatus();
+</script>
+
+</html>

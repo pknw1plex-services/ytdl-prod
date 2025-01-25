@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+
+    <!-- Customize this -->
+    <title>___TITLE___</title>
+    <meta name="description" content="____DESCRIPTION____">
+    <meta name="keywords" content="____KEYWORDS____">
+    <meta property="og:title" content="____DESCRIPTION____">
+    <meta property="og:url" content="https://DOWNLOADER.com">
+    <meta property="og:site_name" content="DOWNLOADER">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:description" content="____DESCRIPTION____">
+    <meta name="twitter:title" content="___TITLE___">
+    <!-- END OF CUSTIMIZATION -->
+
+    <!-- REPLACE WITH YOUR LOGOS -->
+    <!-- Use this website: https://realfavicongenerator.net/ -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/static/assets/images/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/static/assets/images/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/assets/images/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/static/assets/images/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/assets/images/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/static/assets/images/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/static/assets/images/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/assets/images/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/images/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/assets/images/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/assets/images/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/static/assets/images/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/static/assets/images/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <!-- END OF LOGOS -->
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/assets/css/bootstrap.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="/static/assets/css/mdb.css?889" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css">
+    <!-- Custom styles for this template -->
+    <style>
+    .body {
+      background-color: #232323 !important;
+      color: #e5a00d;
+    }
+    
+    .navbar {
+    background-color: #e5a00d;
+    }
+        .md-outline.select-wrapper+label {
+            top: .5em !important;
+            z-index: 2 !important
+        }
+
+        .center-it {
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        .md-outline.select-wrapper+label {
+            top: .5em !important;
+            z-index: 2 !important
+        }
+
+        #format_select {
+            border-width: 0 0 1px 0
+        }
+
+        .card {
+            border: 0;
+            box-shadow: none
+        }
+    .footer {
+    }
+
+        .card-footer {
+            background-color: #fff
+        }
+
+        .scrollable-menu {
+            height: auto;
+            max-height: 200px;
+            overflow-x: hidden
+        }
+    </style>
+</head>
+
+<body>
+
+    <!--Navbar -->
+
+    <!--/.Navbar -->
+
+    <div class="w-75 center-it">
+                        <form method="post" action="/">
+
+        <div class="tab-content card pt-5" id="myTabContentJust">
+            <div class="tab-pane fade show active md-form" id="home-just" role="tabpanel">
+                <div class="d-flex justify-content-center row">
+                    <input type="url" name="url" id="url" class="form-control form-control-lg col-md-7 mr-sm-2 mb-2 mb-sm-0" placeholder="Insert URL here" aria-label="Insert URL here">
+		      <select name="res" id="res">
+    <option value="480">480</option>
+    <option value="720">720</option>
+    <option value="1080">1080</option>
+  </select>
+
+                    <button class="btn btn-success col-md-2 m-0" id="submit" type="submit">Download to Plex</button>
+
+                </div>
+            </div>
+        </div>
+                                        </form>
+					<br />
+					<center>
+   	<table style="font-size: 14px">
+		<tr><td colspan=4>
+	<h5>Previous Downloads</h5>
+
+			</td>
+					</tr>
+					<tr>
+						<th>channel</th><th>title</th><th>resolution</th><th>progress</th><th>link</th>
+					</tr>
+					{% for sections in downloads %}
+					<tr><td>{{downloads[sections]['channel'] }}</td>
+
+					<td><a href="https://www.youtube.com/watch?v={{downloads[sections]['video_id']}}" target="_new">{{downloads[sections]['title']}}</a></td>
+					<td> {{downloads[sections]['resolution']}}</td>
+						<td> {{downloads[sections]['progress']}}</td>
+						<td>
+						{% if downloads[sections]['download_url'] %}
+							<a href="{{downloads[sections]['download_url']}}">download</a>
+						{% endif %}
+						</td></tr>
+					{% endfor %}
+					</table>
+					</center>
+    </div>
+    <!-- Downloads -->
+    <div class="container mt-5 pt-3 mb-5">
+        <div class="row center-it mx-auto" id="download_row"></div>
+    </div>
+    <!-- //Downloads -->
+
+    <div class="container">
+   </div>
+
+    <!-- Footer -->
+ 
+    <!-- Footer -->
+
+    <!-- Modals -->
+    <div id="modals">
+        <div class="modal fade" id="quicklinkmodal" tabindex="-1" role="dialog" aria-labelledby="quicklinklabel" aria-hidden="true">
+            <!-- Change class .modal-sm to change the size of the modal -->
+            <div class="modal-dialog modal-fluid w-75" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title w-100" id="quicklinklabel">QuickLink</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <h2>Create a Quicklink</h2>
+                        <hr>
+                        <p>If you want to lead your users to download directly without them having to interact with the site you can create a quicklink that will start to process the video immediatly after opening the site.</p>
+                        <hr>
+                        <input type="url" id="qlurl" class="form-control form-control-lg mb-2" placeholder="Insert URL here" value="https://www.youtube.com/watch?v=iSshSXte2XI">
+                        <hr><input type="url" value="" id="quicklink" class="form-control form-control-lg mr-sm-2 mb-2 mb-sm-0" placeholder="Insert URL here">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <!-- JQuery -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.8/js/mdb.min.js"></script>
+    <!-- Custom JS -->
+    <script type="text/javascript" src="/static/assets/javascript/main.js"></script>
+</body>
+
