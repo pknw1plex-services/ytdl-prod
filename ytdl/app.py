@@ -14,7 +14,7 @@ import configparser
 
 keyFile = open('config/keys', 'r')
 app = Flask(__name__)
-api_key = ''
+api_key = keyFile.readline().rstrip()
 app.secret_key = keyFile.readline().rstrip()
 progress = 0
 status = 0
