@@ -119,10 +119,26 @@
             </div>
         </div>
                                         </form>
+					<br />
+					<center>
+   	<table style="font-size: 14px">
+		<tr><td colspan=4>
+	<h5>Previous Downloads</h5>
 
+			</td>
+					</tr>
+					<tr>
+						<th>id</th><th>channel</th><th>title</th><th>link</th>
+					</tr>
+					{% for sections in history %}
+					<tr><td><a href="https://www.youtube.com/watch?v={{sections}}" target="_new">{{sections}}</a></td>
+						<td>{{history[sections]['channel'] }}</td>
+						<td> {{history[sections]['title']}}</td>
+						<td><a href="{{history[sections]['link']}}">download</a></td></tr>
+					{% endfor %}
+					</table>
+					</center>
     </div>
-                <li class="nav-item"><a class="nav-link" data-toggle="modal" data-target="#quicklinkmodal"><i class="fas fa-link"></i> QuickLink</a></li>
-
     <!-- Downloads -->
     <div class="container mt-5 pt-3 mb-5">
         <div class="row center-it mx-auto" id="download_row"></div>

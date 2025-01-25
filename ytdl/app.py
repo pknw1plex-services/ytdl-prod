@@ -14,14 +14,14 @@ import configparser
 
 keyFile = open('config/keys', 'r')
 app = Flask(__name__)
-api_key = keyFile.readline().rstrip()
+api_key = 
 app.secret_key = keyFile.readline().rstrip()
 progress = 0
 status = 0
 download_url = ''
 localStorage = localStoragePy('pk', 'text')
 config_object = configparser.ConfigParser()
-
+downloads = configparser.ConfigParser()
 def task():
   global status
   global progress
@@ -33,7 +33,7 @@ def task():
     id = localStorage.getItem('download_data_id')
     target_url = 'https://p.oceansaver.in/ajax/progress.php?id='+id
     response = requests.get(target_url).json()
-    localStorage.setItem('progress', response)
+    localStorage.setItem('progress', response['progress'])
     status = response['success']
     progress = response['progress']
     download_url = response['download_url']
@@ -103,9 +103,9 @@ def download(id=None,res=None):
         'Origin': 'https://en.loader.to',
         'Content-Type': 'application/json'
     }
+
     download_data = {}
     download_data = requests.get(target_url).json()
-    #print(download_data)
     localStorage.setItem('download_data',download_data)
 
     youtube_metadata = {}
@@ -188,6 +188,21 @@ def pleX_dl(id=None):
 
     return render_template('plex2.html',poster=poster, data=data, yt_title=yt_title, ytdata=ytdata, yt_channel=yt_channel, yt_year=yt_year, yt_description=yt_description, download_url=download_url, video_id=video_id, history=output_dict)
 
+def get_history():
+    file =open("history.ini","r")
+    config_object.read_file(file)
+    output_dict=dict()
+    sections=config_object.sections()
+    print(sections)
+    for section in sections:
+        items=config_object.items(section)
+        output_dict[section]=dict(items)
+    json_string=json.dumps(output_dict)
+    print("The output JSON string is:")
+    print(json_string)
+    return output_dict
+
+
 @app.route('/api/ytdl/<id>')
 def plex_dl(id=None):
   yt_title = localStorage.getItem('yt_title')
@@ -221,6 +236,73 @@ def test(page=None):
     response = render_template(page+'.html')
     return response
 
+def fork_status(download_id=None,section=None):
+    target_url = 'https://p.oceansaver.in/ajax/progress.php?id='+download_id
+    success = 0
+    while success == 0:
+        response = requests.get(target_url).json()
+        success = response['success']
+        if success == 0:
+            print(response['progress'])
+            file =open("downloads.ini","r")
+            downloads.read_file(file)
+            downloads.set(section, 'progress', str(response['progress']))
+            with open('downloads.ini', 'w') as configfile:
+                downloads.write(configfile)
+            file.close()
+            sleep(20)
+        else:
+            download_url = response['download_url']
+    file =open("downloads.ini","r")
+    downloads.read_file(file)        
+    downloads.set(section, 'download_url', response['download_url'])
+    downloads.set(section, 'progress', '1000')
+    with open('downloads.ini', 'w') as configfile:
+        downloads.write(configfile)
+    file.close()
+    print("done")
+
+
+
+@app.route('/config/<video_id>')
+@app.route('/config/<video_id>/<res>')
+def configs(video_id=None,res=None):
+    if res == None:
+        res = '480'
+    file =open("downloads.ini","r")
+    downloads.read_file(file)
+    section = video_id+'-'+res
+    if downloads.has_section(section) == False:
+        downloads.add_section(section)
+        target_url = 'https://p.oceansaver.in/ajax/download.php?format='+res+'&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D'+video_id
+        response = requests.get(target_url).json()
+        downloads.set(section, 'title', response['title'])
+        downloads.set(section, 'download_id', response['id'])
+        downloads.set(section, 'poster', response['info']['image'])
+        metadata = ytmetadata(video_id)
+        downloads.set(section, 'channel', metadata['items'][0]['snippet']['channelTitle'])
+        downloads.set(section, 'year', metadata['items'][0]['snippet']['publishedAt'].split('-',1)[0])
+
+        with open('downloads.ini', 'w') as configfile:
+            downloads.write(configfile)
+        file.close()
+
+    file =open("downloads.ini","r")
+    downloads.read_file(file)
+    try:
+        download_link = downloads.get(section, 'download_url')
+    except:
+        newpid = os.fork()
+        if newpid == 0:
+            dl_id = downloads.get(section, 'download_id')
+            fork_status(dl_id,section)
+    file.close()
+    return download_url
+     
+
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
@@ -236,7 +318,8 @@ def index():
         if id != None:
            response = redirect('/download/'+id+'/'+res)
         else:
-           response = render_template('dl2.html')
+           history=get_history()
+           response = render_template('dl2.html',history=history)
 
     if request.method == 'POST':
         videoid = request.form.get('url')
