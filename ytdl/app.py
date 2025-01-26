@@ -14,7 +14,8 @@ import configparser
 
 keyFile = open('config/keys', 'r')
 app = Flask(__name__)
-api_key = keyFile.readline().rstrip()
+api_key = os.getenv('youtube_api')
+#keyFile.readline().rstrip()
 app.secret_key = keyFile.readline().rstrip()
 progress = 0
 status = 0
@@ -162,14 +163,14 @@ def pleX_dl(id=None):
     video_id = localStorage.getItem('video_id')
     poster = localStorage.getItem('poster')
     newpid = os.fork()
-    file =open("history.ini","r")
+    file =open("config/history.ini","r")
     config_object.read_file(file)
     if config_object.has_section(video_id) == False:
         config_object.add_section(video_id)
         config_object.set(video_id, 'title', yt_title)
         config_object.set(video_id, 'channel', yt_channel)
         config_object.set(video_id, 'link', download_url)
-        with open('history.ini', 'w') as configfile:
+        with open('config/history.ini', 'w') as configfile:
             config_object.write(configfile)
     else:
         print("yes")
@@ -192,7 +193,7 @@ def pleX_dl(id=None):
     return render_template('plex2.html',poster=poster, data=data, yt_title=yt_title, ytdata=ytdata, yt_channel=yt_channel, yt_year=yt_year, yt_description=yt_description, download_url=download_url, video_id=video_id, history=output_dict)
 
 def get_history():
-    file =open("history.ini","r")
+    file =open("config/history.ini","r")
     config_object.read_file(file)
     output_dict=dict()
     sections=config_object.sections()
@@ -207,7 +208,7 @@ def get_history():
 '''
 
 def get_downloads():
-    file =open("downloads.ini","r")
+    file =open("config/downloads.ini","r")
     config_object.read_file(file)
     output_dict=dict()
     sections=config_object.sections()
@@ -237,11 +238,11 @@ def fork_dl(data=None):
     if not os.path.exists(pathname+"/"+filename_clean):
         with urlopen(download_url) as in_stream, open(dl_path, 'wb') as out_file:
             copyfileobj(in_stream, out_file)
-        file =open("downloads.ini","r")
+        file =open("config/downloads.ini","r")
         downloads.read_file(file)
         section = video_id+'-'+resolution
         downloads.set(section, 'downloaded', dl_path)
-        with open('downloads.ini', 'w') as configfile:
+        with open('config/downloads.ini', 'w') as configfile:
             downloads.write(configfile)
         file.close()
 
@@ -287,20 +288,20 @@ def fork_status(download_id=None,section=None):
         success = response['success']
         if success == 0:
             print(response['progress'])
-            file =open("downloads.ini","r")
+            file =open("config/downloads.ini","r")
             downloads.read_file(file)
             downloads.set(section, 'progress', str(response['progress']))
-            with open('downloads.ini', 'w') as configfile:
+            with open('config/downloads.ini', 'w') as configfile:
                 downloads.write(configfile)
             file.close()
             sleep(20)
         else:
             download_url = response['download_url']
-    file =open("downloads.ini","r")
+    file =open("config/downloads.ini","r")
     downloads.read_file(file)        
     downloads.set(section, 'download_url', response['download_url'])
     downloads.set(section, 'progress', '1000')
-    with open('downloads.ini', 'w') as configfile:
+    with open('config/downloads.ini', 'w') as configfile:
         downloads.write(configfile)
     file.close()
     print("done")
@@ -312,7 +313,7 @@ def fork_status(download_id=None,section=None):
 def configs(video_id=None,res=None):
     if res == None:
         res = '480'
-    file =open("downloads.ini","r")
+    file =open("config/downloads.ini","r")
     downloads.read_file(file)
     section = video_id+'-'+res
     if downloads.has_section(section) == False:
@@ -327,14 +328,15 @@ def configs(video_id=None,res=None):
         downloads.set(section, 'poster', response['info']['image'])
         downloads.set(section, 'progress', '0')
         metadata = ytmetadata(video_id)
+        print(metadata)
         downloads.set(section, 'channel', metadata['items'][0]['snippet']['channelTitle'])
         downloads.set(section, 'year', metadata['items'][0]['snippet']['publishedAt'].split('-',1)[0])
 
-        with open('downloads.ini', 'w') as configfile:
+        with open('config/downloads.ini', 'w') as configfile:
             downloads.write(configfile)
         file.close()
 
-    file =open("downloads.ini","r")
+    file =open("config/downloads.ini","r")
     downloads.read_file(file)
     try:
         download_link = downloads.get(section, 'download_url')
@@ -381,8 +383,8 @@ def index():
         url = '/config/'+video_id+'/'+res
         response = redirect(url)
 
-    download_check = get_downloads()
-    for sections in download_check:
+    downloads = get_downloads()
+    for sections in downloads:
         try:
             downloaded = downloads[sections]['downloaded']
         except:
