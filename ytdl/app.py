@@ -14,7 +14,8 @@ import configparser
 
 keyFile = open('config/keys', 'r')
 app = Flask(__name__)
-api_key = keyFile.readline().rstrip()
+api_key = os.getenv('youtube_api')
+#keyFile.readline().rstrip()
 app.secret_key = keyFile.readline().rstrip()
 progress = 0
 status = 0
@@ -327,6 +328,7 @@ def configs(video_id=None,res=None):
         downloads.set(section, 'poster', response['info']['image'])
         downloads.set(section, 'progress', '0')
         metadata = ytmetadata(video_id)
+        print(metadata)
         downloads.set(section, 'channel', metadata['items'][0]['snippet']['channelTitle'])
         downloads.set(section, 'year', metadata['items'][0]['snippet']['publishedAt'].split('-',1)[0])
 
@@ -381,8 +383,8 @@ def index():
         url = '/config/'+video_id+'/'+res
         response = redirect(url)
 
-    download_check = get_downloads()
-    for sections in download_check:
+    downloads = get_downloads()
+    for sections in downloads:
         try:
             downloaded = downloads[sections]['downloaded']
         except:

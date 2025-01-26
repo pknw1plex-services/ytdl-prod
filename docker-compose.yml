@@ -1,6 +1,7 @@
 services:
   ytdl:
-    image: pknw1/ytdl-prod:dev 
+    image: pknw1/ytdl-prod:latest
+    env_file: .env
     container_name: ytdl
     hostname: ytdl
     networks:
