@@ -185,6 +185,21 @@
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.8/js/mdb.min.js"></script>
     <!-- Custom JS -->
-    <script type="text/javascript" src="/static/assets/javascript/main.js"></script>
+    <script type="text/javascript" src="/static/assets/javascript/main.js">
+</script>
+<script>
+
+$(document).ready(function() {
+  setInterval(function() {
+    cache_clear()
+  }, 5000);
+});
+
+function cache_clear() {
+  window.location.reload(true);
+  // window.location.reload(); use this if you do not remove cache
+}
+</script>
+
 </body>
 
